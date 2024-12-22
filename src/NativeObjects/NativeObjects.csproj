@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);CustomNugetPack</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>NativeObjects</PackageId>
+    <PackageVersion>1.0.0.0</PackageVersion>
+    <Title>NativeObjects</Title>
+    <Authors>Kevin Gosse</Authors>
+    <PackageProjectUrl>https://github.com/kevingosse/NativeObjects</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kevingosse/NativeObjects</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/kevingosse/NativeObjects/blob/master/LICENSE</PackageLicenseUrl>
+    <Description>
+      Source generator for native interop.
+      Generates implementation for interfaces to expose managed objects as COM-like, or call methods on COM-like native objects.
+    </Description>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
+    <PackageTags>source-generator source-generation sourcegenerator COM native interop</PackageTags>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
+
+  <Target Name="CustomNugetPack">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(BuildPath)">
+        <PackagePath>build/</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+</Project>
