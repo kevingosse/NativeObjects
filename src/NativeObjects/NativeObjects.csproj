@@ -16,7 +16,8 @@
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/NativeObjects</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kevingosse/NativeObjects</RepositoryUrl>
-    <PackageLicenseUrl>https://github.com/kevingosse/NativeObjects/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>
       Source generator for native interop.
       Generates implementation for interfaces to expose managed objects as COM-like, or call methods on COM-like native objects.
