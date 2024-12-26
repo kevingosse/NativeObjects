@@ -27,7 +27,7 @@ public interface ICalculator
 }
 ```
 
-**The order of the method is used to build the vtable. Therefore you MUST declare the methods in the same order as the native object.**
+**The order of the methods is used to build the vtable. Therefore you MUST declare the methods in your interface in the same order as the native object.**
 
 From there, you can consume a native object that implements this interface:
 
