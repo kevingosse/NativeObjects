@@ -34,7 +34,7 @@ From there, you can consume a native object that implements this interface:
 ```
 public int DoSomething(IntPtr nativePtr)
 {
-    var calc = new NativeObjects.ICalculatorInvoker(nativePtr);
+    var calc = NativeObjects.ICalculator.Wrap(nativePtr);
 
     return calc.Add(2, 3);
 }
