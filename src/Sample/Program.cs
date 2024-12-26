@@ -11,7 +11,7 @@ internal class Program
 
     static void CallNativeCalculator(IntPtr ptr)
     {
-        var calculator = new NativeObjects.ICalculatorInvoker(ptr);
+        var calculator = NativeObjects.ICalculator.Wrap(ptr);
         var result = calculator.Add(2, 3);
 
         Console.WriteLine($"2 + 3 = {result}");

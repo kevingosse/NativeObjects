@@ -103,12 +103,9 @@ internal class NativeObjectsNamespaceAttribute : Attribute
 
         public static {typeName} Wrap({interfaceName} implementation) => new(implementation);
 
-        public static implicit operator IntPtr({typeName} stub) => stub.Object;
+        public static {invokerName} Wrap(IntPtr ptr) => new(ptr);
 
-        ~{typeName}()
-        {
-            Dispose();
-        }
+        public static implicit operator IntPtr({typeName} stub) => stub.Object;
 
         public void Dispose()
         {
@@ -119,8 +116,6 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                 NativeMemory.Free(target);
                 Object = IntPtr.Zero;
             }
-
-            GC.SuppressFinalize(this);
         }
 
         private static class Exports
