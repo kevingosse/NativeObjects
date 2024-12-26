@@ -31,7 +31,7 @@ public interface ICalculator
 
 From there, you can consume a native object that implements this interface:
 
-```
+```csharp
 public int DoSomething(IntPtr nativePtr)
 {
     var calc = NativeObjects.ICalculator.Wrap(nativePtr);
@@ -42,7 +42,7 @@ public int DoSomething(IntPtr nativePtr)
 
 Or implement that interface then expose the managed object to native code:
 
-```
+```csharp
 public class MyCalculator : ICalculator
 {
     public int Add(int value1, int value2)
