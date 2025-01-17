@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace NativeObjectGenerator;
 
@@ -120,7 +121,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
 
         private static class Exports
         {
-    {exports}
+{exports}
         }
     }
 
@@ -133,10 +134,11 @@ internal class NativeObjectsNamespaceAttribute : Attribute
             _implementation = implementation;
         }
 
+        public static implicit operator IntPtr({invokerName} invoker) => invoker._implementation;
+
         private nint* VTable => (nint*)*(nint*)_implementation;
 
-    {invokerFunctions}
- 
+        {invokerFunctions} 
     }
 ");
 
@@ -234,7 +236,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                 exports.AppendLine();
                 exports.AppendLine();
 
-                functionPointers.Append($"            *(vtable + {delegateCount}) = (IntPtr)(delegate* unmanaged<IntPtr*");
+                functionPointers.Append($"        *(vtable + {delegateCount}) = (IntPtr)(delegate* unmanaged<IntPtr*");
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
@@ -257,7 +259,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
 
                 functionPointers.AppendLine($">)&Exports.{method.Name};");
 
-                invokerFunctions.Append($"            public {method.ReturnType} {method.Name}(");
+                invokerFunctions.Append($"public {method.ReturnType} {method.Name}(");
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
@@ -281,13 +283,13 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                             break;
                     }
 
-                    invokerFunctions.Append($"{method.Parameters[i].Type} a{i}");
+                    invokerFunctions.Append($"{method.Parameters[i].Type} {GetSafeName(method.Parameters[i])}");
                 }
 
                 invokerFunctions.AppendLine(")");
-                invokerFunctions.AppendLine("            {");
+                invokerFunctions.AppendLine("        {");
 
-                invokerFunctions.Append("                var func = (delegate* unmanaged[Stdcall]<IntPtr");
+                invokerFunctions.Append("            var func = (delegate* unmanaged[Stdcall]<IntPtr");
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
@@ -313,7 +315,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
 
                 invokerFunctions.AppendLine($", {method.ReturnType}>)*(VTable + {delegateCount});");
 
-                invokerFunctions.Append("                ");
+                invokerFunctions.Append("            ");
 
                 if (method.ReturnType.SpecialType != SpecialType.System_Void)
                 {
@@ -341,12 +343,12 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                             break;
                     }
 
-                    invokerFunctions.Append($"a{i}");
+                    invokerFunctions.Append(GetSafeName(method.Parameters[i]));
                 }
 
                 invokerFunctions.AppendLine(");");
 
-                invokerFunctions.AppendLine("            }");
+                invokerFunctions.AppendLine("        }");
 
                 delegateCount++;
             }
@@ -362,5 +364,11 @@ internal class NativeObjectsNamespaceAttribute : Attribute
         sourceBuilder.Replace("{invokerName}", invokerName);
 
         return ($"{symbol.ContainingNamespace?.Name ?? "_"}.{symbol.Name}", sourceBuilder.ToString());
+    }
+
+    private static string GetSafeName(IParameterSymbol symbol)
+    {
+        var kind = SyntaxFacts.GetKeywordKind(symbol.Name);
+        return SyntaxFacts.IsKeywordKind(kind) ? $"@{symbol.Name}" : symbol.Name;
     }
 }
