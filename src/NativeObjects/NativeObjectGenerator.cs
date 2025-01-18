@@ -289,7 +289,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                 invokerFunctions.AppendLine(")");
                 invokerFunctions.AppendLine("        {");
 
-                invokerFunctions.Append("            var func = (delegate* unmanaged[Stdcall]<IntPtr");
+                invokerFunctions.Append("            var __func__ = (delegate* unmanaged[Stdcall]<IntPtr");
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
@@ -322,7 +322,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                     invokerFunctions.Append("return ");
                 }
 
-                invokerFunctions.Append("func(_implementation");
+                invokerFunctions.Append("__func__(_implementation");
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
