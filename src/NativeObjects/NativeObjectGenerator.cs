@@ -16,7 +16,7 @@ public class NativeObjectGenerator : IIncrementalGenerator
                 string namespaceValue = null;
 
                 var nsAttrSymbol = compilation.GetTypeByMetadataName("NativeObjectsNamespaceAttribute");
-                
+
                 if (nsAttrSymbol != null)
                 {
                     foreach (var attrData in compilation.Assembly.GetAttributes())
@@ -79,6 +79,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
     {
         var sourceBuilder = new StringBuilder(@"
     using System;
+    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
 
     {visibility} unsafe class {typeName} : IDisposable
@@ -181,8 +182,10 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                     parameterList.Append($", {parameter.Type}{isPointer} __arg{parameter.Ordinal}");
                 }
 
+                var isReturnPointer = method.ReturnsByRef ? "*" : "";
+
                 exports.AppendLine($"            [UnmanagedCallersOnly]");
-                exports.AppendLine($"            public static {method.ReturnType} {method.Name}({parameterList})");
+                exports.AppendLine($"            public static {method.ReturnType}{isReturnPointer} {method.Name}({parameterList})");
                 exports.AppendLine($"            {{");
                 exports.AppendLine($"                var handle = GCHandle.FromIntPtr(*(self + 1));");
                 exports.AppendLine($"                var obj = ({interfaceName})handle.Target;");
@@ -190,7 +193,14 @@ internal class NativeObjectsNamespaceAttribute : Attribute
 
                 if (!method.ReturnsVoid)
                 {
-                    exports.Append("var result = ");
+                    if (method.ReturnsByRef)
+                    {
+                        exports.Append($"ref var result = ref ");
+                    }
+                    else
+                    {
+                        exports.Append("var result = ");
+                    }
                 }
 
                 exports.Append($"obj.{method.Name}(");
@@ -210,6 +220,10 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                     {
                         exports.Append($"out var __local{i}");
                     }
+                    else if (method.Parameters[i].RefKind is RefKind.Ref)
+                    {
+                        exports.Append($"ref *__arg{i}");
+                    }
                     else
                     {
                         exports.Append($"__arg{i}");
@@ -228,7 +242,14 @@ internal class NativeObjectsNamespaceAttribute : Attribute
 
                 if (!method.ReturnsVoid)
                 {
-                    exports.AppendLine($"                return result;");
+                    if (method.ReturnsByRef)
+                    {
+                        exports.AppendLine($"                return ({method.ReturnType}*)Unsafe.AsPointer(ref result);");
+                    }
+                    else
+                    {
+                        exports.AppendLine($"                return result;");
+                    }
                 }
 
                 exports.AppendLine($"            }}");
@@ -255,11 +276,18 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                 else
                 {
                     functionPointers.Append($", {method.ReturnType}");
+
+                    if (method.ReturnsByRef)
+                    {
+                        functionPointers.Append("*");
+                    }
                 }
 
                 functionPointers.AppendLine($">)&Exports.{method.Name};");
 
-                invokerFunctions.Append($"public {method.ReturnType} {method.Name}(");
+                var returnByRef = method.ReturnsByRef ? "ref" : "";
+
+                invokerFunctions.Append($"public {returnByRef} {method.ReturnType} {method.Name}(");
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
@@ -313,13 +341,13 @@ internal class NativeObjectsNamespaceAttribute : Attribute
                     invokerFunctions.Append(method.Parameters[i].Type);
                 }
 
-                invokerFunctions.AppendLine($", {method.ReturnType}>)*(VTable + {delegateCount});");
+                invokerFunctions.AppendLine($", {returnByRef} {method.ReturnType}>)*(VTable + {delegateCount});");
 
                 invokerFunctions.Append("            ");
 
                 if (method.ReturnType.SpecialType != SpecialType.System_Void)
                 {
-                    invokerFunctions.Append("return ");
+                    invokerFunctions.Append($"return {returnByRef} ");
                 }
 
                 invokerFunctions.Append("__func__(_implementation");
