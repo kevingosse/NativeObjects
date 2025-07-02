@@ -126,7 +126,7 @@ internal class NativeObjectsNamespaceAttribute : Attribute
         }
     }
 
-    public unsafe struct {invokerName}
+    public unsafe readonly struct {invokerName}
     {
         private readonly IntPtr _implementation;
 
