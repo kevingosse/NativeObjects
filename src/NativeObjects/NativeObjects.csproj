@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <PackageId>NativeObjects</PackageId>
-    <PackageVersion>1.3.0.0</PackageVersion>
+    <PackageVersion>1.4.0.0</PackageVersion>
     <Title>NativeObjects</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/NativeObjects</PackageProjectUrl>
@@ -22,7 +22,7 @@
       Source generator for native interop.
       Generates implementation for interfaces to expose managed objects as COM-like, or call methods on COM-like native objects.
     </Description>
-    <PackageReleaseNotes>Add support for ref arguments and ref return.</PackageReleaseNotes>
+    <PackageReleaseNotes>Mark invokers as readonly.</PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>source-generator source-generation sourcegenerator COM native interop</PackageTags>
     <PackageOutputPath>..\..\nugets</PackageOutputPath>
